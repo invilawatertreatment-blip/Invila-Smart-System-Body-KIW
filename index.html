@@ -1,43 +1,268 @@
-<div class="dashboard-grid">
-    <div class="data-card">
-        <span class="data-label">Influent Turbidity</span>
-        <span class="data-val" id="d1">88.1</span><small>NTU</small>
-    </div>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INVILA™ SMART SYSTEM | HIGH-INTENSITY DIGITAL TWIN</title>
     
-    <div class="data-card" style="border-color: #f1c40f;">
-        <span class="data-label">Solid-Liquid Separation Efficiency</span>
-        <span class="data-val" id="separationEff" style="color: #f1c40f;">99.95</span><small>%</small>
+    <style>
+        :root {
+            --bg-dark: #070b14;
+            --panel-bg: #0f172a;
+            --invila-cyan: #00f2ff;
+            --mbbr-green: #2ecc71;
+            --dirty-mud: #3d2b1f; /* Warna lumpur pekat untuk simulasi skor 99 */
+            --text-slate: #94a3b8;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hmi-wrapper {
+            width: 100%;
+            max-width: 1300px;
+            background: var(--panel-bg);
+            border: 2px solid #1e293b;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 60px rgba(0,0,0,0.8);
+        }
+
+        /* HEADER STATUS */
+        .hmi-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        #status-text {
+            font-size: 0.85rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: color 0.5s;
+        }
+
+        /* AREA VISUALISASI UTAMA */
+        .visualizer-area {
+            position: relative;
+            width: 100%;
+            height: 550px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            border: 1px solid #334155;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        /* BACKGROUND UNIT (65% SCALE) */
+        .unit-background {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 65%; 
+            height: auto;
+            opacity: 0.85;
+            z-index: 1;
+            content: url('invila-unit-technical.png'); 
+        }
+
+        /* ANIMASI 100 PARTIKEL GELAP (HIGH-LOAD) */
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: var(--dirty-mud);
+            border-radius: 50%;
+            z-index: 3;
+            opacity: 0;
+            filter: blur(0.5px);
+        }
+
+        @keyframes swirlAndSettle {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0.9; }
+            20% { transform: translate(40px, -40px) rotate(180deg); opacity: 0.9; }
+            50% { transform: translate(80px, 100px) rotate(360deg); opacity: 0.7; }
+            80% { transform: translate(110px, 200px); opacity: 0.4; }
+            100% { transform: translate(120px, 280px); opacity: 0; }
+        }
+
+        /* EFEK AIR CRYSTAL CLEAR */
+        .crystal-clear-layer {
+            position: absolute;
+            top: 30%;
+            left: 42%;
+            width: 0;
+            height: 40%;
+            background: linear-gradient(to right, transparent, rgba(0, 242, 255, 0.4));
+            z-index: 2;
+            transition: width 2s ease-in-out;
+            border-radius: 0 50px 50px 0;
+        }
+
+        /* FLOW PIPES POSITIONS (Presisi Flange) */
+        .pipe-flow { position: absolute; height: 12px; border-radius: 6px; z-index: 5; transition: width 1.5s ease; }
+        .inflow { top: 20%; left: 8%; background: var(--dirty-mud); box-shadow: 0 0 10px var(--dirty-mud); }
+        .outflow { bottom: 22%; right: 8%; background: var(--invila-cyan); box-shadow: 0 0 20px var(--invila-cyan); }
+
+        /* DASHBOARD DATA GRID */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .data-card {
+            background: #070b14;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 4px solid var(--invila-cyan);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .data-label { font-size: 0.55rem; color: var(--text-slate); text-transform: uppercase; line-height: 1.2; font-weight: bold; }
+        .data-val { font-size: 1.5rem; font-weight: 900; display: block; margin: 5px 0; }
+        .u-metric { font-size: 0.7rem; color: var(--text-slate); }
+
+        /* OFFICIAL GUARANTEE */
+        .guarantee-box {
+            text-align: center;
+            margin-top: 25px;
+            padding: 15px;
+            border: 1px dashed var(--invila-cyan);
+            color: var(--invila-cyan);
+            font-weight: bold;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="hmi-wrapper">
+    <header class="hmi-header">
+        <h1 style="color:var(--invila-cyan); margin:0; letter-spacing: 2px; font-size: 1.6rem;">INVILA™ SMART SYSTEM | LIVE SIMULATION</h1>
+        <span id="status-text" style="color:var(--mbbr-green);">● STATUS: SYSTEM INITIALIZING</span>
+    </header>
+
+    <div class="visualizer-area">
+        <img class="unit-background" src="invila-unit-technical.png">
+        
+        <div id="settleZone" class="crystal-clear-layer"></div>
+        <div id="particleField"></div>
+
+        <div id="pipeIn" class="pipe-flow inflow" style="width: 0;"></div>
+        <div id="pipeOut" class="pipe-flow outflow" style="width: 0;"></div>
     </div>
 
-    <div class="data-card" style="border-color: var(--mbbr-green);">
-        <span class="data-label">Effluent Quality</span>
-        <span class="data-val" id="d2" style="color:var(--mbbr-green)">0.69</span><small>NTU</small>
+    <div class="dashboard-grid">
+        <div class="data-card">
+            <span class="data-label">Influent Turbidity</span>
+            <span class="data-val" id="val-influent">88.1</span>
+            <span class="u-metric">NTU</span>
+        </div>
+
+        <div class="data-card" style="border-color: #f1c40f;">
+            <span class="data-label">Solid-Liquid Separation Efficiency</span>
+            <span class="data-val" id="val-efficiency" style="color: #f1c40f;">99.95</span>
+            <span class="u-metric">% Accuracy</span>
+        </div>
+
+        <div class="data-card" style="border-color: var(--mbbr-green);">
+            <span class="data-label">Effluent Quality</span>
+            <span class="data-val" id="val-effluent" style="color:var(--mbbr-green)">0.69</span>
+            <span class="u-metric">NTU (Permenkes Ready)</span>
+        </div>
+
+        <div class="data-card">
+            <span class="data-label">Invila™ DECM Stability Index</span>
+            <span class="data-val" id="val-decm">99.2</span>
+            <span class="u-metric">% Accuracy</span>
+        </div>
     </div>
-    <div class="data-card">
-        <span class="data-label">Invila™ DECM Stability</span>
-        <span class="data-val">99.2</span><small>% Stability</small>
+
+    <footer style="text-align: center; margin-top: 30px; font-size: 0.7rem; color: #475569;">
+        © 2026 INVILA™ ASIA - Water Technology Excellence
+    </footer>
+
+    <div class="guarantee-box">
+        "No-Result, No-Pay. Apapun kondisinya, performa air adalah jaminan kami."
     </div>
 </div>
 
 <script>
-    // Logika Sensor Fluktuatif Spesifik (99.88% - 99.99%)
-    function updateSensors() {
-        // Influent NTU
-        document.getElementById('d1').innerText = (85 + Math.random() * 5).toFixed(1);
-        
-        // Effluent NTU 
-        document.getElementById('d2').innerText = (0.6 + Math.random() * 0.2).toFixed(2);
-        
-        // FLUKTUASI EFISIENSI PEMISAHAN (99.88 - 99.99)
-        const minEff = 99.88;
-        const maxEff = 99.99;
-        const currentEff = (Math.random() * (maxEff - minEff) + minEff).toFixed(2);
-        document.getElementById('separationEff').innerText = currentEff;
+    function runSimulationLoop() {
+        const pField = document.getElementById('particleField');
+        const clearWater = document.getElementById('settleZone');
+        const pipeIn = document.getElementById('pipeIn');
+        const pipeOut = document.getElementById('pipeOut');
+        const statusText = document.getElementById('status-text');
+
+        // --- STEP 1: RESET & INFLUENT START ---
+        statusText.innerText = "● STATUS: HIGH-LOAD INFLUENT INJECTION";
+        statusText.style.color = "#d35400"; 
+        pipeOut.style.width = '0%';
+        clearWater.style.width = '0%';
+        pField.innerHTML = '';
+        pipeIn.style.width = '14%';
+
+        // --- STEP 2: INTENSIVE COAGULATION (100 PARTICLES) ---
+        setTimeout(() => {
+            statusText.innerText = "● STATUS: AERO COAGULATION & FLOCCULATION (100x LOAD)";
+            statusText.style.color = "white";
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const p = document.createElement('div');
+                    p.className = 'particle';
+                    p.style.left = (22 + Math.random() * 18) + '%';
+                    p.style.top = (30 + Math.random() * 25) + '%';
+                    p.style.animation = `swirlAndSettle ${2 + Math.random() * 2}s forwards ease-in`;
+                    pField.appendChild(p);
+                }, i * 30);
+            }
+        }, 1200);
+
+        // --- STEP 3: CRYSTAL CLEAR (HYBRID LAMELLA & DECM) ---
+        setTimeout(() => {
+            statusText.innerText = "● STATUS: PRECISION SOLID-LIQUID SEPARATION (DECM ACTIVE)";
+            statusText.style.color = "var(--invila-cyan)";
+            clearWater.style.width = '42%';
+        }, 4500);
+
+        // --- STEP 4: EFFLUENT OUTPUT (AERO GSF) ---
+        setTimeout(() => {
+            statusText.innerText = "● STATUS: PRODUCING ULTRA-PURE RECLAMATION WATER";
+            statusText.style.color = "var(--mbbr-green)";
+            pipeOut.style.width = '14%';
+        }, 7000);
+
+        // --- RESTART LOOP (TOTAL 11 DETIK) ---
+        setTimeout(runSimulationLoop, 11000);
     }
 
-    // Jalankan update setiap 2 detik agar terlihat live
-    setInterval(updateSensors, 2000);
-    
-    // Fungsi animasi partikel dan crystal clear tetap berjalan di latar belakang
-    window.onload = runSimulationLoop; 
+    // DINAMIKA SENSOR LIVE
+    function updateLiveSensors() {
+        document.getElementById('val-influent').innerText = (88 + Math.random() * 4).toFixed(1);
+        document.getElementById('val-effluent').innerText = (0.4 + Math.random() * 0.3).toFixed(2);
+        
+        // EFISIENSI (99.88 - 99.99)
+        const currentEff = (Math.random() * (99.99 - 99.88) + 99.88).toFixed(2);
+        document.getElementById('val-efficiency').innerText = currentEff;
+
+        document.getElementById('val-decm').innerText = (99 + Math.random() * 0.8).toFixed(1);
+    }
+
+    setInterval(updateLiveSensors, 2000);
+    window.onload = runSimulationLoop;
 </script>
+
+</body>
+</html>
