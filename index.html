@@ -2,26 +2,21 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>INVILA™ SMART SYSTEM - Digital Twin HMI</title>
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <title>INVILA™ SMART SYSTEM | Digital Twin HMI</title>
     <style>
         :root {
             --bg-dark: #070b14;
             --panel-bg: #0f172a;
             --invila-cyan: #00f2ff;
             --mbbr-green: #2ecc71;
-            --danger-red: #ff4d4d;
             --dirty-brown: #5d4e40;
-            --clean-blue: #2ecc71;
-            --text-grey: #94a3b8;
+            --text-slate: #94a3b8;
         }
 
         body {
             background-color: var(--bg-dark);
             color: white;
-            font-family: 'Segoe UI', 'Consolas', monospace; /* Gaya Industrial SCADA */
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -30,31 +25,19 @@
 
         .hmi-wrapper {
             width: 100%;
-            max-width: 1400px;
+            max-width: 1300px;
             background: var(--panel-bg);
             border: 2px solid #1e293b;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            box-shadow: 0 0 60px rgba(0,0,0,0.8);
         }
 
-        /* HEADER SECTION */
-        .hmi-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #1e293b;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        .hmi-header h1 { font-size: 1.6rem; margin: 0; letter-spacing: 2px; color: var(--invila-cyan); }
-        .system-status { font-size: 0.75rem; color: var(--mbbr-green); font-weight: bold; }
-
-        /* VISUALISASI UTAMA (UNIT FISIK) */
+        /* AREA VISUALISASI UTAMA */
         .visualizer-area {
             position: relative;
             width: 100%;
-            height: 600px;
+            height: 550px;
             background: rgba(0,0,0,0.4);
             border-radius: 15px;
             border: 1px solid #334155;
@@ -62,177 +45,149 @@
             margin-bottom: 30px;
         }
 
-        /* GAMBAR TEKNIS SEBAGAI LATAR (image_5.png) */
+        /* BACKGROUND UNIT TEKNIS (65%) */
         .unit-background {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%; /* Sesuaikan skala */
+            width: 65%; 
             height: auto;
             opacity: 0.8;
             z-index: 1;
-            /* GANTI INI DENGAN PATH GAMBAR ANDA */
-            content: url('invila_unit.png'); 
+            /* Sinkron dengan file di GitHub Anda */
+            content: url('invila-unit-technical.png'); 
         }
 
-        /* ANIMASI ALIRAN AIR (OVERLAY) */
-        .water-stream {
+        /* ANIMASI PARTIKEL (SIMULASI PENGENDAPAN) */
+        .particle {
             position: absolute;
-            height: 10px;
-            border-radius: 5px;
-            z-index: 5;
-        }
-
-        /* Influent (Masuk - Flange Atas) */
-        .stream-in {
-            top: 25%; /* Sesuaikan posisi flange atas pada gambar */
-            left: 10%; /* Sesuaikan posisi flange atas pada gambar */
-            width: 0%; /* Di-update via JS */
+            width: 5px;
+            height: 5px;
             background: var(--dirty-brown);
-            box-shadow: 0 0 15px var(--dirty-brown);
-            transition: width 2s ease;
+            border-radius: 50%;
+            z-index: 3;
+            opacity: 0;
         }
 
-        /* Effluent (Keluar - Flange Bawah) */
-        .stream-out {
-            bottom: 25%; /* Sesuaikan posisi flange bawah pada gambar */
-            right: 10%; /* Sesuaikan posisi flange bawah pada gambar */
-            width: 0%; /* Di-update via JS */
-            background: var(--invila-cyan);
-            box-shadow: 0 0 20px var(--invila-cyan);
-            transition: width 2s ease;
+        @keyframes swirlAndSettle {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
+            30% { transform: translate(60px, -30px) rotate(180deg); opacity: 0.8; }
+            60% { transform: translate(100px, 100px); opacity: 0.6; } /* Mengendap */
+            100% { transform: translate(120px, 200px); opacity: 0; } /* Hilang di dasar */
         }
 
-        /* IOT DATA OVERLAY (Menempel pada Unit) */
-        .iot-label {
+        /* EFEK AIR CRYSTAL CLEAR */
+        .crystal-clear-layer {
             position: absolute;
-            background: rgba(15, 23, 42, 0.8);
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #334155;
-            font-size: 0.7rem;
-            z-index: 10;
+            top: 30%;
+            left: 45%;
+            width: 0;
+            height: 40%;
+            background: linear-gradient(to right, transparent, rgba(0, 242, 255, 0.3));
+            z-index: 2;
+            transition: width 3s ease-in-out;
+            border-radius: 0 50px 50px 0;
         }
-        .iot-val { font-size: 1.2rem; font-weight: bold; color: white; display: block; }
-        .iot-unit { font-size: 0.7rem; color: var(--text-grey); }
 
-        /* DASHBOARD GRID (Data IOT) */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-        .data-card {
-            background: #070b14;
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 4px solid var(--invila-cyan);
-            text-align: center;
-        }
-        .data-label { font-size: 0.7rem; color: var(--text-grey); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-        .data-val { font-size: 2rem; font-weight: 900; color: white; }
+        /* FLOW PIPES */
+        .pipe-flow { position: absolute; height: 10px; border-radius: 5px; z-index: 5; transition: width 2s ease; }
+        .inflow { top: 22%; left: 10%; background: var(--dirty-brown); box-shadow: 0 0 10px var(--dirty-brown); }
+        .outflow { bottom: 25%; right: 10%; background: var(--invila-cyan); box-shadow: 0 0 20px var(--invila-cyan); }
 
+        /* DATA BOXES */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .data-card { background: #070b14; padding: 15px; border-radius: 12px; border-left: 4px solid var(--invila-cyan); text-align: center; }
+        .data-val { font-size: 1.5rem; font-weight: 900; display: block; }
+        .data-label { font-size: 0.6rem; color: var(--text-slate); text-transform: uppercase; }
+
+        .guarantee { text-align: center; margin-top: 25px; padding: 15px; border: 1px dashed var(--invila-cyan); color: var(--invila-cyan); font-weight: bold; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <div class="hmi-wrapper">
-    <header class="hmi-header">
-        <div>
-            <h1>INVILA™ SMART SYSTEM | DIGITAL TWIN HMI</h1>
-            <p style="color: var(--text-grey); margin: 5px 0 0 0;">Scenario 1: Compact Integrated Reclamation Unit</p>
-        </div>
-        <div class="system-status">● SMART-IOT ACTIVE</div>
+    <header style="text-align: center; margin-bottom: 25px;">
+        <h1 style="color:var(--invila-cyan); margin:0;">INVILA™ SMART SYSTEM HMI</h1>
+        <span style="color:var(--mbbr-green); font-size: 0.8rem;">● DIGITAL TWIN ACTIVE</span>
     </header>
 
     <div class="visualizer-area">
-        <img class="unit-background" alt="Invila Compact Unit Technical Drawing">
+        <img class="unit-background" src="invila-unit-technical.png">
+        
+        <div id="settleZone" class="crystal-clear-layer"></div>
+        <div id="particleField"></div>
 
-        <div class="water-stream stream-in" id="flowIn"></div>
-        <div class="water-stream stream-out" id="flowOut"></div>
-
-        <div class="iot-label" style="top: 20%; left: 5%;">
-            <span class="iot-label-text">INFLUENT QUALITY</span>
-            <span class="iot-val" id="over1">85.40</span>
-            <span class="iot-unit">NTU</span>
-        </div>
-
-        <div class="iot-label" style="top: 50%; left: 50%; transform: translate(-50%, -50%); border-color: var(--invila-cyan);">
-            <span class="iot-label-text" style="color: var(--invila-cyan);">INVILA™ DECM STABILITY</span>
-            <span class="iot-val" id="over2">99.20</span>
-            <span class="iot-unit">%</span>
-        </div>
-
-        <div class="iot-label" style="bottom: 20%; right: 5%; border-color: var(--mbbr-green);">
-            <span class="iot-label-text" style="color: var(--mbbr-green);">EFFLUENT QUALITY</span>
-            <span class="iot-val" id="over3" style="color: var(--mbbr-green);">0.85</span>
-            <span class="iot-unit">NTU</span>
-        </div>
+        <div id="pipeIn" class="pipe-flow inflow" style="width: 0;"></div>
+        <div id="pipeOut" class="pipe-flow outflow" style="width: 0;"></div>
     </div>
 
     <div class="dashboard-grid">
         <div class="data-card">
-            <div class="data-label">Flowrate (Compact Unit)</div>
-            <div class="data-val">120.5</div>
-            <div class="iot-unit">m³/hour</div>
+            <span class="data-label">Influent Turbidity</span>
+            <span class="data-val" id="d1">88.1</span><small>NTU</small>
+        </div>
+        <div class="data-card" style="border-color: #f1c40f;">
+            <span class="data-label">Oxy-Pure Boost</span>
+            <span class="data-val">890</span><small>kW/h</small>
         </div>
         <div class="data-card" style="border-color: var(--mbbr-green);">
-            <div class="data-label">Bacterial Health (GSF)</div>
-            <div class="data-val">98.5</div>
-            <div class="iot-unit">%</div>
+            <span class="data-label">Effluent Quality</span>
+            <span class="data-val" id="d2" style="color:var(--mbbr-green)">0.69</span><small>NTU</small>
         </div>
         <div class="data-card">
-            <div class="data-label">Effluent COD</div>
-            <div class="data-val">14.2</div>
-            <div class="iot-unit">mg/L</div>
-        </div>
-        <div class="data-card">
-            <div class="data-label">OPEX Saving (IOT Simulation)</div>
-            <div class="data-val" style="color: var(--invila-cyan);">45.0</div>
-            <div class="iot-unit">%</div>
+            <span class="data-label">DECM Stability</span>
+            <span class="data-val">99.2</span><small>%</small>
         </div>
     </div>
 
-    <footer style="margin-top: 40px; text-align: center; font-size: 0.7rem; color: #475569; border-top: 1px solid #1e293b; padding-top: 20px;">
-        "Zero CAPEX. Total Integration. High-Rate Physical & Biological Reclamation."
-        <br><br>© 2026 INVILA™ ASIA - Water Technology Excellence
+    <footer style="text-align: center; margin-top: 30px; font-size: 0.7rem; color: #475569;">
+        © 2026 INVILA™ ASIA - Water Technology Excellence
     </footer>
+
+    <div class="guarantee">
+        "No-Result, No-Pay. Apapun kondisinya, performa air adalah jaminan kami."
+    </div>
 </div>
 
 <script>
-    // FUNGSI UNTUK MEMULAI ANIMASI ALIRAN AIR
-    function startFlowAnimation() {
-        const flowIn = document.getElementById('flowIn');
-        const flowOut = document.getElementById('flowOut');
+    function runSimulation() {
+        const pField = document.getElementById('particleField');
+        const clearWater = document.getElementById('settleZone');
+        
+        // 1. Influent Flow
+        document.getElementById('pipeIn').style.width = '12%';
 
-        // Reset
-        flowIn.style.width = '0%';
-        flowOut.style.width = '0%';
+        // 2. Swirling Particles
+        for (let i = 0; i < 40; i++) {
+            setTimeout(() => {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = (25 + Math.random() * 15) + '%';
+                p.style.top = (35 + Math.random() * 20) + '%';
+                p.style.animation = `swirlAndSettle ${2 + Math.random() * 2}s forwards`;
+                pField.appendChild(p);
+            }, i * 80);
+        }
 
-        // Aliran Masuk (Dirty)
+        // 3. Settling & Crystal Clear Appearance
         setTimeout(() => {
-            flowIn.style.width = '30%'; // Sesuaikan panjang pipa influent
-        }, 500);
-
-        // Aliran Keluar (Clean) - Muncul setelah jeda proses
-        setTimeout(() => {
-            flowOut.style.width = '30%'; // Sesuaikan panjang pipa effluent
+            clearWater.style.width = '35%';
         }, 3000);
+
+        // 4. Effluent Outflow
+        setTimeout(() => {
+            document.getElementById('pipeOut').style.width = '12%';
+        }, 5000);
+
+        // Dynamic Data
+        setInterval(() => {
+            document.getElementById('d1').innerText = (85 + Math.random() * 5).toFixed(1);
+            document.getElementById('d2').innerText = (0.5 + Math.random() * 0.3).toFixed(2);
+        }, 2000);
     }
 
-    // FUNGSI SIMULASI DATA IOT DYNAMIC
-    function updateIOTData() {
-        document.getElementById('over1').innerText = (80 + Math.random() * 10).toFixed(2);
-        document.getElementById('over2').innerText = (98 + Math.random() * 1.5).toFixed(2);
-        document.getElementById('over3').innerText = (0.5 + Math.random() * 0.5).toFixed(2);
-    }
-
-    // Jalankan animasi saat halaman dimuat
-    window.onload = () => {
-        startFlowAnimation();
-        setInterval(updateIOTData, 2000); // Update data setiap 2 detik
-    }
+    window.onload = runSimulation;
 </script>
 
 </body>
