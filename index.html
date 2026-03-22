@@ -2,8 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>INVILA™ SMART SYSTEM - Digital Twin HMI</title>
-    
+    <title>INVILA™ SMART SYSTEM | Digital Twin HMI v2.3</title>
     <style>
         :root {
             --bg-dark: #070b14;
@@ -11,13 +10,14 @@
             --invila-cyan: #00f2ff;
             --mbbr-green: #2ecc71;
             --dirty-brown: #5d4e40;
-            --text-grey: #94a3b8;
+            --text-slate: #94a3b8;
+            --p-cyan: #00f2ff;
         }
 
         body {
             background-color: var(--bg-dark);
             color: white;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Segoe UI', 'Consolas', monospace;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -26,124 +26,133 @@
 
         .hmi-wrapper {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
             background: var(--panel-bg);
             border: 2px solid #1e293b;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            box-shadow: 0 0 60px rgba(0,0,0,0.8);
         }
 
-        .hmi-header {
-            border-bottom: 2px solid #1e293b;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
+        /* HEADER */
+        .hmi-header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 15px; margin-bottom: 30px; }
+        .hmi-header h1 { font-size: 1.5rem; margin: 0; letter-spacing: 2px; color: var(--invila-cyan); }
+        .system-status { font-size: 0.7rem; color: var(--mbbr-green); font-weight: bold; }
 
-        /* CONTAINER VISUALISASI UTAMA */
-        .visualizer-container {
+        /* AREA VISUALISASI UTAMA (UNIT FISIK) */
+        .visualizer-area {
             position: relative;
             width: 100%;
-            height: 550px;
-            background: rgba(0,0,0,0.3);
+            height: 600px; /* Pertahankan tinggi agar tetap megah */
+            background: rgba(0,0,0,0.4);
             border-radius: 15px;
-            overflow: hidden;
             border: 1px solid #334155;
+            overflow: hidden;
+            margin-bottom: 30px;
         }
 
-        /* GAMBAR TEKNIS DARI GITHUB ANDA */
-        .technical-image {
+        /* GAMBAR TEKNIS SEBAGAI LATAR (image_5.png) */
+        .unit-background {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 85%;
+            /* Pengecilan Menjadi 65% */
+            width: 65%; 
             height: auto;
+            opacity: 0.75;
             z-index: 1;
-            opacity: 0.9;
+            /* GANTI INI DENGAN PATH GAMBAR ANDA */
+            content: url('invila-unit-technical.png'); 
         }
 
         /* ANIMASI ALIRAN AIR (OVERLAY) */
-        .water-flow {
-            position: absolute;
-            z-index: 5;
-            border-radius: 10px;
-        }
-
-        /* Influent (Masuk dari Flange Atas Kiri) */
-        .flow-in {
-            top: 22%;
-            left: 2%;
+        .water-stream { position: absolute; height: 10px; border-radius: 5px; z-index: 5; }
+        .stream-in {
+            top: 15%; /* Flange atas kiri */
+            left: 10%;
             width: 0%;
-            height: 12px;
             background: var(--dirty-brown);
             box-shadow: 0 0 15px var(--dirty-brown);
-            animation: startFlowIn 2s forwards;
+            transition: width 2s ease;
         }
-
-        /* Effluent (Keluar dari Flange Bawah Kanan) */
-        .flow-out {
-            bottom: 18%;
-            right: 2%;
+        .stream-out {
+            bottom: 25%; /* Flange bawah kanan */
+            right: 10%;
             width: 0%;
-            height: 12px;
             background: var(--invila-cyan);
             box-shadow: 0 0 20px var(--invila-cyan);
-            animation: startFlowOut 2s forwards 3s; /* Delay 3 detik nunggu proses */
+            transition: width 2s ease;
         }
 
-        /* LABEL DATA IOT (OVERLAY) */
-        .iot-data-tag {
-            position: absolute;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid var(--invila-cyan);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            z-index: 10;
-            pointer-events: none;
-        }
+        /* IOT DATA OVERLAY (Menempel pada Unit) */
+        .iot-label { position: absolute; background: rgba(15, 23, 42, 0.85); padding: 8px 12px; border-radius: 8px; border: 1px solid #334155; font-size: 0.7rem; z-index: 10; pointer-events: none; }
+        .iot-val { font-size: 1.2rem; font-weight: bold; color: white; display: block; }
+        .iot-unit { font-size: 0.7rem; color: var(--text-grey); }
 
-        .val-big { display: block; font-size: 1.3rem; font-weight: 900; color: white; }
-
-        @keyframes startFlowIn { to { width: 12%; } }
-        @keyframes startFlowOut { to { width: 12%; } }
-
-        /* FOOTER STATUS */
-        .status-footer {
-            margin-top: 30px;
+        /* DASHBOARD GRID (Data IOT) */
+        .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
+            gap: 20px;
         }
 
-        .stat-card {
-            background: rgba(255,255,255,0.03);
-            padding: 15px;
-            border-radius: 10px;
+        .data-card {
+            background: #070b14;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--invila-cyan);
             text-align: center;
-            border-bottom: 3px solid #1e293b;
+        }
+
+        /* PERBAIKAN POSISI: BOX INFLUENT SEBELUM OXY-PURE */
+        #cardInfluent { border-left-color: var(--dirty-brown); }
+        #cardOxyPure { border-left-color: var(--p-cyan); }
+        #cardEffluent { border-left-color: var(--mbbr-green); }
+
+        .data-label { font-size: 0.65rem; color: var(--text-grey); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .data-val { font-size: 1.8rem; font-weight: 900; color: white; }
+
+        /* Hak Cipta */
+        .footer-note {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #475569;
+            border-top: 1px solid #1e293b;
+            padding-top: 20px;
+        }
+
+        /* PEMINDAHAN: GARANSI NO-RESULT, NO-PAY (PALING BAWAH) */
+        .guarantee-footer {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: var(--invila-cyan);
+            padding: 10px;
+            border: 1px dashed var(--invila-cyan);
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
 
 <div class="hmi-wrapper">
-    <div class="hmi-header">
-        <h1 style="color:var(--invila-cyan); margin:0; font-size:1.4rem;">INVILA™ SMART SYSTEM | HMI DIGITAL TWIN</h1>
-        <p style="color:var(--text-grey); font-size:0.8rem; margin:5px 0 0 0;">SCENARIO 1: INTEGRATED RETROFIT RECLAMATION</p>
-    </div>
+    <header class="hmi-header">
+        <h1>INVILA™ SMART SYSTEM | DIGITAL TWIN HMI v2.3</h1>
+        <div class="system-status">● SMART-IOT ACTIVE | SCENE 1: COMPACT</div>
+    </header>
 
-    <div class="visualizer-container">
-        <img src="invila-unit-technical.png" class="technical-image" alt="Invila Technical Drawing">
+    <div class="visualizer-area">
+        <img class="unit-background" alt="Invila Technical Drawing">
 
-        <div class="water-flow flow-in"></div>
-        <div class="water-flow flow-out"></div>
+        <div class="water-stream stream-in" id="flowIn"></div>
+        <div class="water-stream stream-out" id="flowOut"></div>
 
-        <div class="iot-data-tag" style="top: 15%; left: 5%;">
+        <div class="iot-label" style="top: 10%; left: 5%;">
             INFLUENT TURBIDITY
-            <span class="val-big" id="v1">85.4</span> NTU
+            <span class="iot-val" id="v1">85.4</span> NTU
         </div>
 
         <div class="iot-data-tag" style="top: 45%; left: 45%; border-color: var(--mbbr-green);">
@@ -151,44 +160,74 @@
             <span class="val-big" id="v2" style="color:var(--mbbr-green)">99.2</span> %
         </div>
 
-        <div class="iot-data-tag" style="bottom: 12%; right: 5%;">
-            EFFLUENT QUALITY
-            <span class="val-big" id="v3" style="color:var(--invila-cyan)">0.85</span> NTU
+        <div class="iot-label" style="bottom: 15%; right: 5%;">
+            EFFLUENT TURBIDITY
+            <span class="iot-val" id="v3" style="color:var(--mbbr-green)">0.85</span> NTU
         </div>
     </div>
 
-    <div class="status-footer">
-        <div class="stat-card">
-            <small style="color:var(--text-grey)">Aero Coagulator</small>
-            <div style="color:var(--invila-cyan); font-weight:bold;">ACTIVE</div>
+    <div class="dashboard-grid">
+        <div class="data-card" id="cardInfluent">
+            <div class="data-label">INFLUENT DATA (IOT)</div>
+            <div class="data-val">85.4</div>
+            <div class="iot-unit">NTU</div>
+            <div style="font-size: 0.6rem; color: #64748b; margin-top: 5px;">
+                COD: 2750 | TSS: 800<br>Complex Carbon Chain (X)
+            </div>
         </div>
-        <div class="stat-card">
-            <small style="color:var(--text-grey)">Aero Flocculator</small>
-            <div style="color:var(--invila-cyan); font-weight:bold;">ACTIVE</div>
+
+        <div class="data-card" id="cardOxyPure">
+            <div class="data-label">OXY-PURE SYNC POWER</div>
+            <div class="data-val">890</div>
+            <div class="iot-unit">kW/h (BOOST)</div>
         </div>
-        <div class="stat-card">
-            <small style="color:var(--text-grey)">Hybrid Lamella</small>
-            <div style="color:var(--mbbr-green); font-weight:bold;">OPTIMAL</div>
+
+        <div class="data-card" id="cardEffluent">
+            <div class="data-label">EFFLUENT | Permenkes</div>
+            <div class="data-val" style="color:var(--mbbr-green)">0.85</div>
+            <div class="iot-unit">NTU | <span style="color:white">ND Heavy Metals</span></div>
         </div>
-        <div class="stat-card">
-            <small style="color:var(--text-grey)">Aero GSF Filter</small>
-            <div style="color:var(--mbbr-green); font-weight:bold;">CLEAN</div>
+
+        <div class="data-card">
+            <div class="data-label">5-Year Strategic Saving</div>
+            <div class="data-val" style="color: var(--invila-cyan);">45.0</div>
+            <div class="iot-unit">%</div>
         </div>
     </div>
 
-    <div style="text-align:center; margin-top:20px; font-size:0.65rem; color:#475569;">
-        © 2026 INVILA™ ASIA - High-Rate Integrated Water Solutions
+    <footer class="footer-note">
+        "Zero CAPEX. Total Integration. High-Rate Physical & Biological Reclamation."
+        <br><br>© 2026 INVILA™ ASIA - Water Technology Excellence
+    </footer>
+
+    <div class="guarantee-footer">
+        'Apapun kondisinya, performa air adalah jaminan kami. No-Result, No-Pay.'
     </div>
 </div>
 
 <script>
-    // Simulasi Data IOT Berubah-ubah
-    function simulateIoT() {
+    // FUNGSI ANIMASI & SIMULASI DATA IOT DYNAMIC
+    function updateIOTData() {
+        // Aliran Masuk
+        const flowIn = document.getElementById('flowIn');
+        flowIn.style.width = '10%'; 
+        
+        // Aliran Keluar
+        setTimeout(() => {
+            document.getElementById('flowOut').style.width = '12%';
+        }, 3000);
+
+        // Update Data Sensor
         document.getElementById('v1').innerText = (80 + Math.random() * 10).toFixed(1);
-        document.getElementById('v2').innerText = (98 + Math.random() * 1.8).toFixed(1);
+        document.getElementById('v2').innerText = (98 + Math.random() * 1.5).toFixed(1);
         document.getElementById('v3').innerText = (0.5 + Math.random() * 0.5).toFixed(2);
     }
-    setInterval(simulateIoT, 2500);
+
+    // Jalankan pertama kali
+    window.onload = () => {
+        updateIOTData();
+        setInterval(updateIOTData, 3000); // Update data setiap 3 detik
+    }
 </script>
 
 </body>
