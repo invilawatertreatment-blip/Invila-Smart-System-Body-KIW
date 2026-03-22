@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>INVILA™ SMART SYSTEM - Digital Twin HMI</title>
+    
+    <style>
+        :root {
+            --bg-dark: #070b14;
+            --panel-bg: #0f172a;
+            --invila-cyan: #00f2ff;
+            --mbbr-green: #2ecc71;
+            --dirty-brown: #5d4e40;
+            --text-grey: #94a3b8;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hmi-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--panel-bg);
+            border: 2px solid #1e293b;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        .hmi-header {
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        /* CONTAINER VISUALISASI UTAMA */
+        .visualizer-container {
+            position: relative;
+            width: 100%;
+            height: 550px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+
+        /* GAMBAR TEKNIS DARI GITHUB ANDA */
+        .technical-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            height: auto;
+            z-index: 1;
+            opacity: 0.9;
+        }
+
+        /* ANIMASI ALIRAN AIR (OVERLAY) */
+        .water-flow {
+            position: absolute;
+            z-index: 5;
+            border-radius: 10px;
+        }
+
+        /* Influent (Masuk dari Flange Atas Kiri) */
+        .flow-in {
+            top: 22%;
+            left: 2%;
+            width: 0%;
+            height: 12px;
+            background: var(--dirty-brown);
+            box-shadow: 0 0 15px var(--dirty-brown);
+            animation: startFlowIn 2s forwards;
+        }
+
+        /* Effluent (Keluar dari Flange Bawah Kanan) */
+        .flow-out {
+            bottom: 18%;
+            right: 2%;
+            width: 0%;
+            height: 12px;
+            background: var(--invila-cyan);
+            box-shadow: 0 0 20px var(--invila-cyan);
+            animation: startFlowOut 2s forwards 3s; /* Delay 3 detik nunggu proses */
+        }
+
+        /* LABEL DATA IOT (OVERLAY) */
+        .iot-data-tag {
+            position: absolute;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--invila-cyan);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .val-big { display: block; font-size: 1.3rem; font-weight: 900; color: white; }
+
+        @keyframes startFlowIn { to { width: 12%; } }
+        @keyframes startFlowOut { to { width: 12%; } }
+
+        /* FOOTER STATUS */
+        .status-footer {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border-bottom: 3px solid #1e293b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="hmi-wrapper">
+    <div class="hmi-header">
+        <h1 style="color:var(--invila-cyan); margin:0; font-size:1.4rem;">INVILA™ SMART SYSTEM | HMI DIGITAL TWIN</h1>
+        <p style="color:var(--text-grey); font-size:0.8rem; margin:5px 0 0 0;">SCENARIO 1: INTEGRATED RETROFIT RECLAMATION</p>
+    </div>
+
+    <div class="visualizer-container">
+        <img src="invila-unit-technical.png" class="technical-image" alt="Invila Technical Drawing">
+
+        <div class="water-flow flow-in"></div>
+        <div class="water-flow flow-out"></div>
+
+        <div class="iot-data-tag" style="top: 15%; left: 5%;">
+            INFLUENT TURBIDITY
+            <span class="val-big" id="v1">85.4</span> NTU
+        </div>
+
+        <div class="iot-data-tag" style="top: 45%; left: 45%; border-color: var(--mbbr-green);">
+            DECM STABILITY
+            <span class="val-big" id="v2" style="color:var(--mbbr-green)">99.2</span> %
+        </div>
+
+        <div class="iot-data-tag" style="bottom: 12%; right: 5%;">
+            EFFLUENT QUALITY
+            <span class="val-big" id="v3" style="color:var(--invila-cyan)">0.85</span> NTU
+        </div>
+    </div>
+
+    <div class="status-footer">
+        <div class="stat-card">
+            <small style="color:var(--text-grey)">Aero Coagulator</small>
+            <div style="color:var(--invila-cyan); font-weight:bold;">ACTIVE</div>
+        </div>
+        <div class="stat-card">
+            <small style="color:var(--text-grey)">Aero Flocculator</small>
+            <div style="color:var(--invila-cyan); font-weight:bold;">ACTIVE</div>
+        </div>
+        <div class="stat-card">
+            <small style="color:var(--text-grey)">Hybrid Lamella</small>
+            <div style="color:var(--mbbr-green); font-weight:bold;">OPTIMAL</div>
+        </div>
+        <div class="stat-card">
+            <small style="color:var(--text-grey)">Aero GSF Filter</small>
+            <div style="color:var(--mbbr-green); font-weight:bold;">CLEAN</div>
+        </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px; font-size:0.65rem; color:#475569;">
+        © 2026 INVILA™ ASIA - High-Rate Integrated Water Solutions
+    </div>
+</div>
+
+<script>
+    // Simulasi Data IOT Berubah-ubah
+    function simulateIoT() {
+        document.getElementById('v1').innerText = (80 + Math.random() * 10).toFixed(1);
+        document.getElementById('v2').innerText = (98 + Math.random() * 1.8).toFixed(1);
+        document.getElementById('v3').innerText = (0.5 + Math.random() * 0.5).toFixed(2);
+    }
+    setInterval(simulateIoT, 2500);
+</script>
+
+</body>
+</html>
