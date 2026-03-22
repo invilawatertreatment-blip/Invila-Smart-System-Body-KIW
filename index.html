@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INVILA™ SMART SYSTEM | LIVE DIGITAL TWIN HMI</title>
+    <title>INVILA™ SMART SYSTEM | SEAMLESS DIGITAL TWIN HMI</title>
     
     <style>
         :root {
@@ -11,7 +11,7 @@
             --panel-bg: #0f172a;
             --invila-cyan: #00f2ff;
             --mbbr-green: #2ecc71;
-            --dirty-mud: #3d2b1f; /* Lumpur pekat untuk simulasi beban tinggi */
+            --dirty-mud: #3d2b1f; /* Lumpur pekat */
             --text-slate: #94a3b8;
         }
 
@@ -36,16 +36,8 @@
         }
 
         /* HEADER STATUS */
-        .hmi-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        #status-text {
-            font-size: 0.85rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-            transition: color 0.5s;
-        }
+        .hmi-header { text-align: center; margin-bottom: 25px; }
+        #status-text { font-size: 1.2rem; font-weight: bold; transition: color 0.3s; }
 
         /* AREA VISUALISASI UTAMA */
         .visualizer-area {
@@ -67,13 +59,12 @@
             transform: translate(-50%, -50%);
             width: 65%; 
             height: auto;
-            opacity: 0.8;
+            opacity: 0.85;
             z-index: 1;
-            /* Pastikan file ini ada di folder yang sama di GitHub */
             content: url('invila-unit-technical.png'); 
         }
 
-        /* ANIMASI 100 PARTIKEL GELAP (HIGH-LOAD) */
+        /* ANIMASI PARTIKEL KONSISTEN KIRI-KE-KANAN */
         .particle {
             position: absolute;
             width: 6px;
@@ -82,80 +73,64 @@
             border-radius: 50%;
             z-index: 3;
             opacity: 0;
-            filter: blur(0.5px);
         }
 
         @keyframes swirlAndSettle {
             0% { transform: translate(0, 0) rotate(0deg); opacity: 0.9; }
-            30% { transform: translate(50px, -20px) rotate(180deg); opacity: 0.9; }
-            60% { transform: translate(100px, 120px); opacity: 0.6; }
-            100% { transform: translate(130px, 220px); opacity: 0; }
+            40% { transform: translate(70px, -20px) rotate(180deg); opacity: 0.9; }
+            70% { transform: translate(130px, 120px); opacity: 0.6; }
+            100% { transform: translate(160px, 220px); opacity: 0; }
         }
 
-        /* EFEK AIR CRYSTAL CLEAR */
+        /* EFEK AIR CRYSTAL CLEAR (TUMBUH KE KANAN) */
         .crystal-clear-layer {
             position: absolute;
             top: 30%;
-            left: 42%;
+            left: 45%; 
             width: 0;
             height: 40%;
-            background: linear-gradient(to right, transparent, rgba(0, 242, 255, 0.4));
+            background: linear-gradient(to right, transparent, rgba(0, 242, 255, 0.5));
             z-index: 2;
-            transition: width 2s ease-in-out;
+            transition: width 1.2s ease-in-out;
             border-radius: 0 50px 50px 0;
         }
 
-        /* FLOW PIPES POSITIONS (Kiri ke Kanan) */
-        .pipe-flow { position: absolute; height: 12px; border-radius: 6px; z-index: 5; transition: width 1.5s ease; }
+        .pipe-flow { position: absolute; height: 12px; border-radius: 6px; z-index: 5; transition: width 0.7s ease; }
         
-        /* Influent MASUK DARI KIRI (Flange Atas) */
-        .inflow { 
-            top: 20%; 
-            left: 8%; 
-            background: var(--dirty-mud); 
-            box-shadow: 0 0 10px var(--dirty-mud); 
-        }
+        /* Inflow Tumbuh ke Kanan */
+        .inflow { top: 20%; left: 8%; background: var(--dirty-mud); box-shadow: 0 0 10px var(--dirty-mud); }
         
-        /* Effluent KELUAR KE KANAN (Flange Bawah) */
-        .outflow { 
-            bottom: 22%; 
-            right: 8%; 
-            background: var(--invila-cyan); 
-            box-shadow: 0 0 20px var(--invila-cyan); 
-        }
+        /* Outflow Tumbuh ke Kanan */
+        .outflow { bottom: 22%; left: 81%; background: var(--invila-cyan); box-shadow: 0 0 20px var(--invila-cyan); }
 
-        /* DASHBOARD DATA GRID */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-
+        /* DASHBOARD DATA (HURUF SANGAT BESAR) */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .data-card {
             background: #070b14;
-            padding: 15px;
+            padding: 25px 15px;
             border-radius: 12px;
-            border-left: 4px solid var(--invila-cyan);
+            border-left: 6px solid var(--invila-cyan);
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            min-height: 160px;
         }
 
-        .data-label { font-size: 0.55rem; color: var(--text-slate); text-transform: uppercase; line-height: 1.2; font-weight: bold; }
-        .data-val { font-size: 1.5rem; font-weight: 900; display: block; margin: 5px 0; }
-        .u-metric { font-size: 0.7rem; color: var(--text-slate); }
+        .data-label { font-size: 0.8rem; color: var(--text-slate); text-transform: uppercase; font-weight: bold; margin-bottom: 8px; line-height: 1.2; }
+        .data-val { font-size: 3rem; font-weight: 900; display: block; }
+        .u-metric { font-size: 1rem; color: var(--text-slate); font-weight: bold; }
+        .decm-info { color: #f1c40f; font-size: 0.85rem; margin-top: 8px; font-weight: bold; }
 
-        /* OFFICIAL GUARANTEE */
         .guarantee-box {
             text-align: center;
-            margin-top: 25px;
-            padding: 15px;
-            border: 1px dashed var(--invila-cyan);
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px dashed var(--invila-cyan);
             color: var(--invila-cyan);
             font-weight: bold;
             border-radius: 10px;
-            font-size: 0.9rem;
+            font-size: 1.3rem;
         }
     </style>
 </head>
@@ -163,16 +138,14 @@
 
 <div class="hmi-wrapper">
     <header class="hmi-header">
-        <h1 style="color:var(--invila-cyan); margin:0; letter-spacing: 2px; font-size: 1.6rem;">INVILA™ SMART SYSTEM | LIVE SIMULATION</h1>
-        <span id="status-text" style="color:var(--mbbr-green);">● STATUS: SYSTEM INITIALIZING</span>
+        <h1 style="color:var(--invila-cyan); margin:0; letter-spacing: 2px; font-size: 2.2rem;">INVILA™ SMART SYSTEM | LIVE SIMULATION</h1>
+        <span id="status-text" style="color:var(--mbbr-green);">● STATUS: ACTIVE</span>
     </header>
 
     <div class="visualizer-area">
         <img class="unit-background" src="invila-unit-technical.png">
-        
         <div id="settleZone" class="crystal-clear-layer"></div>
         <div id="particleField"></div>
-
         <div id="pipeIn" class="pipe-flow inflow" style="width: 0;"></div>
         <div id="pipeOut" class="pipe-flow outflow" style="width: 0;"></div>
     </div>
@@ -188,28 +161,23 @@
             <span class="data-label">Solid-Liquid Separation Efficiency</span>
             <span class="data-val" id="val-efficiency" style="color: #f1c40f;">99.95</span>
             <span class="u-metric">% Accuracy</span>
+            <div class="decm-info">DECM Re No: <span id="val-reynolds">350</span></div>
         </div>
 
         <div class="data-card" style="border-color: var(--mbbr-green);">
             <span class="data-label">Effluent Quality</span>
             <span class="data-val" id="val-effluent" style="color:var(--mbbr-green)">0.69</span>
-            <span class="u-metric">NTU (Permenkes Ready)</span>
+            <span class="u-metric">NTU</span>
         </div>
 
         <div class="data-card">
-            <span class="data-label">Invila™ DECM Stability Index</span>
-            <span class="data-val" id="val-decm">99.2</span>
-            <span class="u-metric">% Accuracy</span>
+            <span class="data-label">High Speed GSF Efisiensi</span>
+            <span class="data-val" id="val-gsf">99.85</span>
+            <span class="u-metric">Range 99.0% - 99.99%</span>
         </div>
     </div>
 
-    <footer style="text-align: center; margin-top: 30px; font-size: 0.7rem; color: #475569;">
-        © 2026 INVILA™ ASIA - Water Technology Excellence
-    </footer>
-
-    <div class="guarantee-box">
-        "No-Result, No-Pay. Apapun kondisinya, performa air adalah jaminan kami."
-    </div>
+    <div class="guarantee-box">"No-Result, No-Pay. Performa air adalah jaminan kami."</div>
 </div>
 
 <script>
@@ -220,64 +188,64 @@
         const pipeOut = document.getElementById('pipeOut');
         const statusText = document.getElementById('status-text');
 
-        // --- STEP 1: RESET & INFLUENT START (KIRI) ---
-        statusText.innerText = "● STATUS: HIGH-LOAD INFLUENT INJECTION";
-        statusText.style.color = "#d35400"; 
+        pipeIn.style.width = '0%';
         pipeOut.style.width = '0%';
         clearWater.style.width = '0%';
         pField.innerHTML = '';
-        pipeIn.style.width = '14%'; // Pipa tumbuh ke kanan menuju unit
+        
+        setTimeout(() => { 
+            pipeIn.style.width = '14%'; 
+            statusText.innerText = "● STATUS: FLOWING INFLUENT";
+            statusText.style.color = "#d35400";
+        }, 100);
 
-        // --- STEP 2: INTENSIVE COAGULATION (100 PARTICLES) ---
         setTimeout(() => {
-            statusText.innerText = "● STATUS: AERO COAGULATION & FLOCCULATION (100x LOAD)";
+            statusText.innerText = "● STATUS: SEPARATING SOLIDS";
             statusText.style.color = "white";
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 120; i++) {
                 setTimeout(() => {
                     const p = document.createElement('div');
                     p.className = 'particle';
-                    // Partikel muncul di area kiri unit
                     p.style.left = (25 + Math.random() * 15) + '%';
                     p.style.top = (32 + Math.random() * 20) + '%';
-                    p.style.animation = `swirlAndSettle ${2 + Math.random() * 2}s forwards ease-in`;
+                    p.style.animation = `swirlAndSettle ${1.2 + Math.random() * 0.8}s forwards linear`;
                     pField.appendChild(p);
-                }, i * 30);
+                }, i * 12);
             }
-        }, 1200);
+        }, 400);
 
-        // --- STEP 3: CRYSTAL CLEAR (HYBRID LAMELLA & DECM) ---
         setTimeout(() => {
-            statusText.innerText = "● STATUS: PRECISION SOLID-LIQUID SEPARATION (DECM ACTIVE)";
-            statusText.style.color = "var(--invila-cyan)";
-            // Air jernih melebar ke kanan
-            clearWater.style.width = '42%';
-        }, 4500);
+            clearWater.style.width = '38%';
+        }, 2200);
 
-        // --- STEP 4: EFFLUENT OUTPUT (AERO GSF) ---
         setTimeout(() => {
-            statusText.innerText = "● STATUS: PRODUCING ULTRA-PURE RECLAMATION WATER";
+            statusText.innerText = "● STATUS: RECLAMATION ACTIVE";
             statusText.style.color = "var(--mbbr-green)";
-            // Pipa effluent tumbuh ke kanan menjauhi unit
             pipeOut.style.width = '14%';
-        }, 7000);
+        }, 3200);
 
-        // --- RESTART LOOP (TOTAL 11 DETIK) ---
-        setTimeout(runSimulationLoop, 11000);
+        setTimeout(runSimulationLoop, 5500);
     }
 
-    // DINAMIKA SENSOR LIVE
     function updateLiveSensors() {
+        // Update NTUs
         document.getElementById('val-influent').innerText = (88 + Math.random() * 4).toFixed(1);
         document.getElementById('val-effluent').innerText = (0.4 + Math.random() * 0.3).toFixed(2);
         
-        // EFISIENSI FLUKTUATIF (99.88 - 99.99)
-        const currentEff = (Math.random() * (99.99 - 99.88) + 99.88).toFixed(2);
+        // Update Efficiency
+        const currentEff = (99.88 + Math.random() * 0.11).toFixed(2);
         document.getElementById('val-efficiency').innerText = currentEff;
 
-        document.getElementById('val-decm').innerText = (99 + Math.random() * 0.8).toFixed(1);
+        // Update DECM Re No (250 - 450)
+        const currentRe = Math.floor(Math.random() * (450 - 250 + 1)) + 250;
+        document.getElementById('val-reynolds').innerText = currentRe;
+
+        // Update High Speed GSF (99.0 - 99.99)
+        const currentGsf = (99.00 + Math.random() * 0.99).toFixed(2);
+        document.getElementById('val-gsf').innerText = currentGsf;
     }
 
-    setInterval(updateLiveSensors, 2000);
+    setInterval(updateLiveSensors, 1500);
     window.onload = runSimulationLoop;
 </script>
 
