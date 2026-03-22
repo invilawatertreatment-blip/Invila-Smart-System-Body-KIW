@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>INVILA™ SMART SYSTEM | Digital Twin HMI</title>
+    <title>INVILA™ SMART SYSTEM | Continuous Digital Twin</title>
     <style>
         :root {
             --bg-dark: #070b14;
@@ -55,15 +55,14 @@
             height: auto;
             opacity: 0.8;
             z-index: 1;
-            /* Sinkron dengan file di GitHub Anda */
             content: url('invila-unit-technical.png'); 
         }
 
-        /* ANIMASI PARTIKEL (SIMULASI PENGENDAPAN) */
+        /* ANIMASI PARTIKEL */
         .particle {
             position: absolute;
-            width: 5px;
-            height: 5px;
+            width: 6px;
+            height: 6px;
             background: var(--dirty-brown);
             border-radius: 50%;
             z-index: 3;
@@ -72,30 +71,30 @@
 
         @keyframes swirlAndSettle {
             0% { transform: translate(0, 0) rotate(0deg); opacity: 0.8; }
-            30% { transform: translate(60px, -30px) rotate(180deg); opacity: 0.8; }
-            60% { transform: translate(100px, 100px); opacity: 0.6; } /* Mengendap */
-            100% { transform: translate(120px, 200px); opacity: 0; } /* Hilang di dasar */
+            30% { transform: translate(50px, -20px) rotate(180deg); opacity: 0.8; }
+            60% { transform: translate(100px, 120px); opacity: 0.6; }
+            100% { transform: translate(130px, 220px); opacity: 0; }
         }
 
         /* EFEK AIR CRYSTAL CLEAR */
         .crystal-clear-layer {
             position: absolute;
             top: 30%;
-            left: 45%;
+            left: 42%;
             width: 0;
             height: 40%;
-            background: linear-gradient(to right, transparent, rgba(0, 242, 255, 0.3));
+            background: linear-gradient(to right, transparent, rgba(0, 242, 255, 0.4));
             z-index: 2;
-            transition: width 3s ease-in-out;
+            transition: width 2s ease-in-out;
             border-radius: 0 50px 50px 0;
         }
 
         /* FLOW PIPES */
-        .pipe-flow { position: absolute; height: 10px; border-radius: 5px; z-index: 5; transition: width 2s ease; }
+        .pipe-flow { position: absolute; height: 12px; border-radius: 6px; z-index: 5; transition: width 1.5s ease; }
         .inflow { top: 22%; left: 10%; background: var(--dirty-brown); box-shadow: 0 0 10px var(--dirty-brown); }
         .outflow { bottom: 25%; right: 10%; background: var(--invila-cyan); box-shadow: 0 0 20px var(--invila-cyan); }
 
-        /* DATA BOXES */
+        /* DASHBOARD GRID */
         .dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
         .data-card { background: #070b14; padding: 15px; border-radius: 12px; border-left: 4px solid var(--invila-cyan); text-align: center; }
         .data-val { font-size: 1.5rem; font-weight: 900; display: block; }
@@ -108,8 +107,8 @@
 
 <div class="hmi-wrapper">
     <header style="text-align: center; margin-bottom: 25px;">
-        <h1 style="color:var(--invila-cyan); margin:0;">INVILA™ SMART SYSTEM HMI</h1>
-        <span style="color:var(--mbbr-green); font-size: 0.8rem;">● DIGITAL TWIN ACTIVE</span>
+        <h1 style="color:var(--invila-cyan); margin:0; letter-spacing: 2px;">INVILA™ SMART SYSTEM | LIVE SIMULATION</h1>
+        <span id="status-text" style="color:var(--mbbr-green); font-size: 0.8rem; font-weight: bold;">● STATUS: PROCESSING INFLUENT</span>
     </header>
 
     <div class="visualizer-area">
@@ -141,53 +140,68 @@
         </div>
     </div>
 
-    <footer style="text-align: center; margin-top: 30px; font-size: 0.7rem; color: #475569;">
-        © 2026 INVILA™ ASIA - Water Technology Excellence
-    </footer>
-
     <div class="guarantee">
         "No-Result, No-Pay. Apapun kondisinya, performa air adalah jaminan kami."
     </div>
 </div>
 
 <script>
-    function runSimulation() {
+    function runSimulationLoop() {
         const pField = document.getElementById('particleField');
         const clearWater = document.getElementById('settleZone');
-        
-        // 1. Influent Flow
-        document.getElementById('pipeIn').style.width = '12%';
+        const pipeIn = document.getElementById('pipeIn');
+        const pipeOut = document.getElementById('pipeOut');
+        const statusText = document.getElementById('status-text');
 
-        // 2. Swirling Particles
-        for (let i = 0; i < 40; i++) {
-            setTimeout(() => {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.style.left = (25 + Math.random() * 15) + '%';
-                p.style.top = (35 + Math.random() * 20) + '%';
-                p.style.animation = `swirlAndSettle ${2 + Math.random() * 2}s forwards`;
-                pField.appendChild(p);
-            }, i * 80);
-        }
+        // --- STEP 1: RESET & INFLUENT START ---
+        statusText.innerText = "● STATUS: INJECTING INFLUENT";
+        statusText.style.color = "var(--dirty-brown)";
+        pipeOut.style.width = '0%';
+        clearWater.style.width = '0%';
+        pField.innerHTML = '';
+        pipeIn.style.width = '12%';
 
-        // 3. Settling & Crystal Clear Appearance
+        // --- STEP 2: SWIRLING PARTICLES (DURASI 3 DETIK) ---
         setTimeout(() => {
-            clearWater.style.width = '35%';
-        }, 3000);
+            statusText.innerText = "● STATUS: MOLECULAR CRACKING & COAGULATION";
+            statusText.style.color = "white";
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const p = document.createElement('div');
+                    p.className = 'particle';
+                    p.style.left = (25 + Math.random() * 15) + '%';
+                    p.style.top = (35 + Math.random() * 20) + '%';
+                    p.style.animation = `swirlAndSettle ${2.5 + Math.random() * 1.5}s forwards`;
+                    pField.appendChild(p);
+                }, i * 50);
+            }
+        }, 1500);
 
-        // 4. Effluent Outflow
+        // --- STEP 3: CRYSTAL CLEAR PHASE ---
         setTimeout(() => {
-            document.getElementById('pipeOut').style.width = '12%';
-        }, 5000);
+            statusText.innerText = "● STATUS: HYBRID LAMELLA SEDIMENTATION";
+            statusText.style.color = "var(--invila-cyan)";
+            clearWater.style.width = '40%';
+        }, 4000);
 
-        // Dynamic Data
-        setInterval(() => {
-            document.getElementById('d1').innerText = (85 + Math.random() * 5).toFixed(1);
-            document.getElementById('d2').innerText = (0.5 + Math.random() * 0.3).toFixed(2);
-        }, 2000);
+        // --- STEP 4: EFFLUENT OUTPUT ---
+        setTimeout(() => {
+            statusText.innerText = "● STATUS: PRODUCING RECLAMATION WATER";
+            statusText.style.color = "var(--mbbr-green)";
+            pipeOut.style.width = '12%';
+        }, 6000);
+
+        // --- STEP 5: RESTART LOOP (TOTAL CYCLE 10 DETIK) ---
+        setTimeout(runSimulationLoop, 10000);
     }
 
-    window.onload = runSimulation;
+    // Simulasi Angka Sensor Berubah
+    setInterval(() => {
+        document.getElementById('d1').innerText = (85 + Math.random() * 5).toFixed(1);
+        document.getElementById('d2').innerText = (0.5 + Math.random() * 0.3).toFixed(2);
+    }, 2000);
+
+    window.onload = runSimulationLoop;
 </script>
 
 </body>
