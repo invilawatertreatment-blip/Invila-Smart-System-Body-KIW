@@ -2,10 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>INVILA™ SMART SYSTEM - Digital Twin HMI</title>
+    <title>INVILA™ SMART SYSTEM | DIGITAL TWIN HMI</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
         :root {
             --bg-dark: #070b14;
@@ -72,166 +70,107 @@
             height: auto;
             opacity: 0.8;
             z-index: 1;
-            /* GANTI INI DENGAN PATH GAMBAR ANDA */
+            /* Sinkron dengan nama file di GitHub Anda */
             content: url('invila-unit-technical.png'); 
         }
 
         /* ANIMASI ALIRAN AIR (OVERLAY) */
-        .water-stream {
+        .water-flow {
             position: absolute;
-            height: 10px;
+            height: 12px;
             border-radius: 5px;
             z-index: 5;
+            transition: width 2s ease, transform 2s ease;
         }
 
-        /* Influent (Masuk - Flange Atas) */
-        .stream-in {
+        /* Influent (Masuk - Flange Atas Kiri) */
+        .flow-in {
             top: 25%; /* Sesuaikan posisi flange atas pada gambar */
             left: 10%; /* Sesuaikan posisi flange atas pada gambar */
             width: 0%; /* Di-update via JS */
             background: var(--dirty-brown);
             box-shadow: 0 0 15px var(--dirty-brown);
-            transition: width 2s ease;
         }
 
-        /* Effluent (Keluar - Flange Bawah) */
-        .stream-out {
+        /* === PERBAIKAN: EFFLUENT KELUAR KE KANAN (Correct Direction) === */
+        .flow-out {
             bottom: 25%; /* Sesuaikan posisi flange bawah pada gambar */
-            right: 10%; /* Sesuaikan posisi flange bawah pada gambar */
+            right: 10%; /* Mulai dari flange unit */
             width: 0%; /* Di-update via JS */
             background: var(--invila-cyan);
             box-shadow: 0 0 20px var(--invila-cyan);
-            transition: width 2s ease;
+            
+            /* Gunakan transformasi agar arah 'tumbuh' ke kanan */
+            transform-origin: left center; 
         }
 
         /* IOT DATA OVERLAY (Menempel pada Unit) */
-        .iot-label {
+        .iot-data-tag {
             position: absolute;
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--invila-cyan);
             padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #334155;
+            border-radius: 8px;
             font-size: 0.7rem;
             z-index: 10;
         }
-        .iot-val { font-size: 1.2rem; font-weight: bold; color: white; display: block; }
-        .iot-unit { font-size: 0.7rem; color: var(--text-grey); }
-
-        /* DASHBOARD GRID (Data IOT) */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-        .data-card {
-            background: #070b14;
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 4px solid var(--invila-cyan);
-            text-align: center;
-        }
-        .data-label { font-size: 0.7rem; color: var(--text-grey); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-        .data-val { font-size: 2rem; font-weight: 900; color: white; }
-
+        .val-big { display: block; font-size: 1.3rem; font-weight: 900; color: white; }
     </style>
 </head>
 <body>
 
 <div class="hmi-wrapper">
     <header class="hmi-header">
-        <div>
-            <h1>INVILA™ SMART SYSTEM | DIGITAL TWIN HMI</h1>
-            <p style="color: var(--text-grey); margin: 5px 0 0 0;">Scenario 1: Compact Integrated Reclamation Unit</p>
-        </div>
-        <div class="system-status">● SMART-IOT ACTIVE</div>
+        <h1 style="color:var(--invila-cyan); margin:0;">INVILA™ SMART SYSTEM | DIGITAL TWIN HMI</h1>
+        <p style="color:var(--text-grey); font-size:0.8rem; margin:5px 0 0 0;">INTEGRATED RETROFIT RECLAMATION (Corrected Flow)</p>
     </header>
 
-    <div class="visualizer-area">
-        <img class="unit-background" alt="Invila Compact Unit Technical Drawing">
+    <div class="visualizer-container">
+        <img class="technical-image" alt="Invila Technical Drawing">
 
-        <div class="water-stream stream-in" id="flowIn"></div>
-        <div class="water-stream stream-out" id="flowOut"></div>
+        <div class="water-flow flow-in" id="flowIn"></div>
+        <div class="water-flow flow-out" id="flowOut"></div>
 
-        <div class="iot-label" style="top: 20%; left: 5%;">
-            <span class="iot-label-text">INFLUENT QUALITY</span>
-            <span class="iot-val" id="over1">85.40</span>
-            <span class="iot-unit">NTU</span>
+        <div class="iot-data-tag" style="top: 20%; left: 5%;">
+            INFLUENT QUALITY
+            <span class="val-big" id="v1">85.40</span> NTU
         </div>
 
-        <div class="iot-label" style="top: 50%; left: 50%; transform: translate(-50%, -50%); border-color: var(--invila-cyan);">
-            <span class="iot-label-text" style="color: var(--invila-cyan);">INVILA™ DECM STABILITY</span>
-            <span class="iot-val" id="over2">99.20</span>
-            <span class="iot-unit">%</span>
+        <div class="iot-data-tag" style="top: 50%; left: 50%; transform: translate(-50%, -50%); border-color: var(--mbbr-green);">
+            DECM STABILITY
+            <span class="val-big" id="v2" style="color:var(--mbbr-green)">99.20</span> %
         </div>
 
-        <div class="iot-label" style="bottom: 20%; right: 5%; border-color: var(--mbbr-green);">
-            <span class="iot-label-text" style="color: var(--mbbr-green);">EFFLUENT QUALITY</span>
-            <span class="iot-val" id="over3" style="color: var(--mbbr-green);">0.85</span>
-            <span class="iot-unit">NTU</span>
+        <div class="iot-data-tag" style="bottom: 20%; right: 5%;">
+            EFFLUENT QUALITY
+            <span class="val-big" id="v3" style="color:var(--invila-cyan)">0.85</span> NTU
         </div>
     </div>
-
-    <div class="dashboard-grid">
-        <div class="data-card">
-            <div class="data-label">Flowrate (Compact Unit)</div>
-            <div class="data-val">120.5</div>
-            <div class="iot-unit">m³/hour</div>
-        </div>
-        <div class="data-card" style="border-color: var(--mbbr-green);">
-            <div class="data-label">Bacterial Health (GSF)</div>
-            <div class="data-val">98.5</div>
-            <div class="iot-unit">%</div>
-        </div>
-        <div class="data-card">
-            <div class="data-label">Effluent COD</div>
-            <div class="data-val">14.2</div>
-            <div class="iot-unit">mg/L</div>
-        </div>
-        <div class="data-card">
-            <div class="data-label">OPEX Saving (IOT Simulation)</div>
-            <div class="data-val" style="color: var(--invila-cyan);">45.0</div>
-            <div class="iot-unit">%</div>
-        </div>
-    </div>
-
-    <footer style="margin-top: 40px; text-align: center; font-size: 0.7rem; color: #475569; border-top: 1px solid #1e293b; padding-top: 20px;">
-        "Zero CAPEX. Total Integration. High-Rate Physical & Biological Reclamation."
-        <br><br>© 2026 INVILA™ ASIA - Water Technology Excellence
-    </footer>
 </div>
 
 <script>
-    // FUNGSI UNTUK MEMULAI ANIMASI ALIRAN AIR
-    function startFlowAnimation() {
+    function updateIOTSimulation() {
         const flowIn = document.getElementById('flowIn');
         const flowOut = document.getElementById('flowOut');
 
-        // Reset
-        flowIn.style.width = '0%';
-        flowOut.style.width = '0%';
-
-        // Aliran Masuk (Dirty)
+        // Aliran Masuk (Dirty - Ke Kanan)
+        flowIn.style.width = '25%'; // Tumbuh ke kanan menuju tangki
+        
+        // Aliran Keluar (Clean - Ke Kanan) - Muncul setelah jeda proses
         setTimeout(() => {
-            flowIn.style.width = '30%'; // Sesuaikan panjang pipa influent
-        }, 500);
-
-        // Aliran Keluar (Clean) - Muncul setelah jeda proses
-        setTimeout(() => {
-            flowOut.style.width = '30%'; // Sesuaikan panjang pipa effluent
+            // Tumbuh ke kanan menjauhi tangki
+            flowOut.style.width = '25%'; 
         }, 3000);
+
+        // Update Data Sensor
+        document.getElementById('v1').innerText = (80 + Math.random() * 10).toFixed(2);
+        document.getElementById('v2').innerText = (98 + Math.random() * 1.5).toFixed(2);
+        document.getElementById('v3').innerText = (0.5 + Math.random() * 0.5).toFixed(2);
     }
 
-    // FUNGSI SIMULASI DATA IOT DYNAMIC
-    function updateIOTData() {
-        document.getElementById('over1').innerText = (80 + Math.random() * 10).toFixed(2);
-        document.getElementById('over2').innerText = (98 + Math.random() * 1.5).toFixed(2);
-        document.getElementById('over3').innerText = (0.5 + Math.random() * 0.5).toFixed(2);
-    }
-
-    // Jalankan animasi saat halaman dimuat
     window.onload = () => {
-        startFlowAnimation();
-        setInterval(updateIOTData, 2000); // Update data setiap 2 detik
+        updateIOTSimulation();
+        setInterval(updateIOTSimulation, 3000); // Update data setiap 3 detik
     }
 </script>
 
