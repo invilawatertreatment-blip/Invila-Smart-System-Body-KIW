@@ -11,14 +11,14 @@
             --panel-bg: #0f172a;
             --invila-cyan: #00f2ff;
             --mbbr-green: #2ecc71;
-            --dirty-mud: #3d2b1f; /* Warna lumpur pekat untuk simulasi skor 99 */
+            --dirty-mud: #3d2b1f; /* Lumpur pekat untuk simulasi beban tinggi */
             --text-slate: #94a3b8;
         }
 
         body {
             background-color: var(--bg-dark);
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -35,11 +35,11 @@
             box-shadow: 0 0 60px rgba(0,0,0,0.8);
         }
 
-        /* HEADER STATUS */
         .hmi-header {
             text-align: center;
             margin-bottom: 25px;
         }
+
         #status-text {
             font-size: 0.85rem;
             font-weight: bold;
@@ -59,7 +59,7 @@
             margin-bottom: 30px;
         }
 
-        /* BACKGROUND UNIT (65% SCALE) */
+        /* BACKGROUND UNIT (Skala 65%) */
         .unit-background {
             position: absolute;
             top: 50%;
@@ -72,7 +72,7 @@
             content: url('invila-unit-technical.png'); 
         }
 
-        /* ANIMASI 100 PARTIKEL GELAP (HIGH-LOAD) */
+        /* ANIMASI 100 PARTIKEL GELAP */
         .particle {
             position: absolute;
             width: 5px;
@@ -86,29 +86,33 @@
 
         @keyframes swirlAndSettle {
             0% { transform: translate(0, 0) rotate(0deg); opacity: 0.9; }
-            20% { transform: translate(40px, -40px) rotate(180deg); opacity: 0.9; }
-            50% { transform: translate(80px, 100px) rotate(360deg); opacity: 0.7; }
-            80% { transform: translate(110px, 200px); opacity: 0.4; }
-            100% { transform: translate(120px, 280px); opacity: 0; }
+            20% { transform: translate(-40px, -40px) rotate(-180deg); opacity: 0.9; }
+            50% { transform: translate(-80px, 100px) rotate(-360deg); opacity: 0.7; }
+            80% { transform: translate(-110px, 200px); opacity: 0.4; }
+            100% { transform: translate(-120px, 280px); opacity: 0; }
         }
 
         /* EFEK AIR CRYSTAL CLEAR */
         .crystal-clear-layer {
             position: absolute;
             top: 30%;
-            left: 42%;
+            right: 42%;
             width: 0;
             height: 40%;
-            background: linear-gradient(to right, transparent, rgba(0, 242, 255, 0.4));
+            background: linear-gradient(to left, transparent, rgba(0, 242, 255, 0.4));
             z-index: 2;
             transition: width 2s ease-in-out;
-            border-radius: 0 50px 50px 0;
+            border-radius: 50px 0 0 50px;
         }
 
-        /* FLOW PIPES POSITIONS (Presisi Flange) */
+        /* POSISI PIPA & ALIRAN (DIREVERSED) */
         .pipe-flow { position: absolute; height: 12px; border-radius: 6px; z-index: 5; transition: width 1.5s ease; }
-        .inflow { top: 20%; left: 8%; background: var(--dirty-mud); box-shadow: 0 0 10px var(--dirty-mud); }
-        .outflow { bottom: 22%; right: 8%; background: var(--invila-cyan); box-shadow: 0 0 20px var(--invila-cyan); }
+        
+        /* Influent ke Kanan (Flange Atas) */
+        .inflow { top: 20%; right: 8%; background: var(--dirty-mud); box-shadow: 0 0 10px var(--dirty-mud); transform: scaleX(-1); }
+        
+        /* Effluent ke Kiri (Flange Bawah) */
+        .outflow { bottom: 22%; left: 8%; background: var(--invila-cyan); box-shadow: 0 0 20px var(--invila-cyan); }
 
         /* DASHBOARD DATA GRID */
         .dashboard-grid {
@@ -132,7 +136,6 @@
         .data-val { font-size: 1.5rem; font-weight: 900; display: block; margin: 5px 0; }
         .u-metric { font-size: 0.7rem; color: var(--text-slate); }
 
-        /* OFFICIAL GUARANTEE */
         .guarantee-box {
             text-align: center;
             margin-top: 25px;
@@ -206,23 +209,24 @@
         const pipeOut = document.getElementById('pipeOut');
         const statusText = document.getElementById('status-text');
 
-        // --- STEP 1: RESET & INFLUENT START ---
-        statusText.innerText = "● STATUS: HIGH-LOAD INFLUENT INJECTION";
+        // --- STEP 1: RESET & INFLUENT KE KANAN ---
+        statusText.innerText = "● STATUS: HIGH-LOAD INFLUENT INJECTION (RIGHT-ENTRY)";
         statusText.style.color = "#d35400"; 
         pipeOut.style.width = '0%';
         clearWater.style.width = '0%';
         pField.innerHTML = '';
         pipeIn.style.width = '14%';
 
-        // --- STEP 2: INTENSIVE COAGULATION (100 PARTICLES) ---
+        // --- STEP 2: INTENSIVE COAGULATION (100 PARTIKEL) ---
         setTimeout(() => {
-            statusText.innerText = "● STATUS: AERO COAGULATION & FLOCCULATION (100x LOAD)";
+            statusText.innerText = "● STATUS: AERO COAGULATION & FLOCCULATION";
             statusText.style.color = "white";
             for (let i = 0; i < 100; i++) {
                 setTimeout(() => {
                     const p = document.createElement('div');
                     p.className = 'particle';
-                    p.style.left = (22 + Math.random() * 18) + '%';
+                    // Partikel muncul dari sisi kanan unit
+                    p.style.right = (22 + Math.random() * 18) + '%';
                     p.style.top = (30 + Math.random() * 25) + '%';
                     p.style.animation = `swirlAndSettle ${2 + Math.random() * 2}s forwards ease-in`;
                     pField.appendChild(p);
@@ -230,30 +234,29 @@
             }
         }, 1200);
 
-        // --- STEP 3: CRYSTAL CLEAR (HYBRID LAMELLA & DECM) ---
+        // --- STEP 3: CRYSTAL CLEAR (DECM ACTIVE) ---
         setTimeout(() => {
-            statusText.innerText = "● STATUS: PRECISION SOLID-LIQUID SEPARATION (DECM ACTIVE)";
+            statusText.innerText = "● STATUS: PRECISION SOLID-LIQUID SEPARATION";
             statusText.style.color = "var(--invila-cyan)";
             clearWater.style.width = '42%';
         }, 4500);
 
-        // --- STEP 4: EFFLUENT OUTPUT (AERO GSF) ---
+        // --- STEP 4: EFFLUENT KE KIRI ---
         setTimeout(() => {
-            statusText.innerText = "● STATUS: PRODUCING ULTRA-PURE RECLAMATION WATER";
+            statusText.innerText = "● STATUS: PRODUCING RECLAMATION WATER (LEFT-EXIT)";
             statusText.style.color = "var(--mbbr-green)";
             pipeOut.style.width = '14%';
         }, 7000);
 
-        // --- RESTART LOOP (TOTAL 11 DETIK) ---
+        // RESTART LOOP
         setTimeout(runSimulationLoop, 11000);
     }
 
-    // DINAMIKA SENSOR LIVE
     function updateLiveSensors() {
         document.getElementById('val-influent').innerText = (88 + Math.random() * 4).toFixed(1);
         document.getElementById('val-effluent').innerText = (0.4 + Math.random() * 0.3).toFixed(2);
         
-        // EFISIENSI (99.88 - 99.99)
+        // EFISIENSI FLUKTUATIF (99.88 - 99.99)
         const currentEff = (Math.random() * (99.99 - 99.88) + 99.88).toFixed(2);
         document.getElementById('val-efficiency').innerText = currentEff;
 
